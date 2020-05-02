@@ -75,7 +75,7 @@ $ ruby -r "./db_manager.rb" -e "DbManager.setup"
 
 $ ruby -r "./upload_app_spec.rb"
 
-- para aplica o linter no código, execute:
+- Para aplicar o linter no código, execute:
 
 $ rubocop -a
 

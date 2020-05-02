@@ -9,6 +9,8 @@
 #
 require 'pg'
 ENV['APP_ENV'] ||= 'development'
+require 'dotenv'
+Dotenv.load(".env.#{ENV['APP_ENV']}")
 
 class DbManager
   def self.connection(dbname={})
@@ -39,9 +41,7 @@ class DbManager
   end
 
   def self.drop
-    @@connection.close
-    @@connection = nil
-    connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};")
+    connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};") if check_if_exists && (connection.close rescue true)
   end
 
   def self.insert(table, columns, values)

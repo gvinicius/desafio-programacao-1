@@ -13,7 +13,6 @@ require './db_manager.rb'
 require 'sinatra'
 require 'pg'
 require 'csv'
-require 'byebug'
 ENV['APP_ENV'] ||= 'development'
 Dotenv.load(".env.#{ENV['APP_ENV']}")
 
