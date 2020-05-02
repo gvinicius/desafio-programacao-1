@@ -12,6 +12,9 @@ require 'dotenv'
 require './db_manager.rb'
 require 'sinatra'
 require 'pg'
+require 'csv'
+require 'byebug'
+ENV['APP_ENV'] ||= 'development'
 Dotenv.load(".env.#{ENV['APP_ENV']}")
 
 set :bind, '0.0.0.0'
@@ -22,11 +25,14 @@ end
 
 post '/upload' do
   base_path = 'uploads_' + ENV['APP_ENV']
+  uploaded_path = "#{base_path}/#{params[:file][:filename]}"
   FileUtils.mkdir_p(base_path)
-  FileUtils.copy(params[:file][:tempfile].path, "#{base_path}/#{params[:file][:filename]}")
-  puts ENV['APP_ENV']
-  puts ENV['POSTGRES_DATABASE']
+  FileUtils.copy(params[:file][:tempfile].path, uploaded_path)
+  parsed_file = CSV.read(uploaded_path, { col_sep: "\t" })
+  sales = parsed_file[1, parsed_file.length].to_s[1...-1].gsub('[', '(').gsub(']', ')').gsub('\'', "''").gsub('"', '\'')
+  # byebug
+  # puts sales
 
-  DbManager.insert('uploads', ['filename'], [params[:file][:filename]])
+  DbManager.insert('sales', parsed_file[0].map { |column| column.gsub(' ', '_') }, sales)
   redirect('/')
 end

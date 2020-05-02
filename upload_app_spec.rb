@@ -14,13 +14,16 @@ require './upload_app.rb'
 require './db_manager.rb'
 require 'minitest/autorun'
 require 'rack/test'
+require 'byebug'
 
 class UploaderTest < Minitest::Test
   include Rack::Test::Methods
 
   def app
-    DbManager.drop
-    DbManager.create
+    if DbManager.check_if_exists
+      DbManager.drop
+    end
+    DbManager.setup
     Sinatra::Application
   end
 
@@ -31,10 +34,10 @@ class UploaderTest < Minitest::Test
   end
 
   def test_upload
-    filename = 'file_example.txt'
+    filename = 'example_input.tab'
     post '/upload', file: Rack::Test::UploadedFile.new(filename, 'text/plain')
 
-    assert filename, DbManager.list('uploads')
+    assert_equal 'João Silva', DbManager.list('sales').first["purchaser_name"]
 
     system('rm -Rf uploads_test/*')
     DbManager.drop

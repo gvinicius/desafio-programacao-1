@@ -8,9 +8,10 @@
 # Distributed under terms of the MIT license.
 #
 require 'pg'
+ENV['APP_ENV'] ||= 'development'
 
 class DbManager
-  def self.connection
+  def self.connection(dbname={})
     db_params = {
       host: ENV['POSTGRES_HOST'],
       user: ENV['POSTGRES_USER'],
@@ -18,6 +19,7 @@ class DbManager
     }
 
     @@connection ||= PG::Connection.new(db_params)
+    @@connection = PG::Connection.new(db_params.merge(dbname)) if dbname != {}
     @@connection
   end
 
@@ -27,25 +29,29 @@ class DbManager
 
   def self.create
     connection.exec_params("CREATE DATABASE #{ENV['POSTGRES_DATABASE']};")
+    @@connection.close
+    @@connection = nil
+    connection({dbname: ENV['POSTGRES_DATABASE']})
   end
 
   def self.migrate
-    connection.exec_params('CREATE TABLE uploads (id bigserial primary key, filename varchar(20) NOT NULL);')
+    connection.exec_params('CREATE TABLE sales (id bigserial primary key, purchaser_name varchar(60), item_description varchar(60), item_price decimal(10,2), purchase_count integer, merchant_address varchar(60), merchant_name varchar(60), file_name varchar(60));')
   end
 
   def self.drop
+    @@connection.close
+    @@connection = nil
     connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};")
   end
 
-  def self.setup
-    unless check_if_exists
-      create
-      migrate
-    end
+  def self.insert(table, columns, values)
+    connection.exec_params("INSERT INTO #{table} (#{columns.join(',')}) values " + values + ';')
   end
 
-  def self.insert(table, columns, values)
-    connection.exec_params("INSERT INTO #{table} (#{columns.join(',')}) values (#{values.map { |value| "'#{value}'" }.join(',')});")
+  def self.setup
+    drop
+    create
+    migrate
   end
 
   def self.list(table)

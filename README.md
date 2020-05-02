@@ -69,7 +69,7 @@ alteradas para as configurações da sua máquina).
 
 - Uma vez configurado o banco e as variáveis de ambiente, execute na linha de comando o seguinte comando para criar a estrutura do banco de dados corretamente.
 
-$ APP_ENV=development ruby -r "./db_manager.rb" -e "DbManager.setup"
+$ ruby -r "./db_manager.rb" -e "DbManager.setup"
 
 - Para testar automatizadamente a aplicação, execute:
 
@@ -81,4 +81,4 @@ $ rubocop -a
 
 - Para habilitar o servidor da aplicação, execute:
 
-$ APP_ENV=development ruby -r "./upload_app.rb"
+$ ruby -r "./upload_app.rb"
