@@ -33,7 +33,7 @@ Sua aplicação web não precisa:
 1. Ter uma aparência bonita.
 
 ## Avaliação
-Seu projeto será avaliado de acordo com os seguintes critérios. 
+Seu projeto será avaliado de acordo com os seguintes critérios.
 
 1. Sua aplicação preenche os requerimentos básicos?
 1. Você documentou a maneira de configurar o ambiente e rodar sua aplicação?
@@ -45,3 +45,40 @@ Adicionalmente, tentaremos verificar a sua familiarização com as bibliotecas p
 ### Referência
 
 Este desafio foi baseado neste outro desafio: https://github.com/lschallenges/data-engineering
+
+* Minha implementação
+
+- Instale e configure o ruby 2.6.5.
+
+- Instale o Postgres client e server (ou somente o cliente e utilize o server pelo docker), o conector do Postgres para o seu Sistema Operacional (no Ubuntu 18.04 é a `libpq-dev`). Para instalar o server, recomenda-se a imagem do docker:
+$ docker run --name pgs -v /var/run/postgresql:/var/run/postgresql -e
+POSTGRES_PASSWORD=mysecretpassword -p 5432:5432  -d postgres
+$ docker start pgs
+
+- Faça o download das dependências:
+
+$ gem install bundler; bundle install
+
+- Preencha os valores corretos das variáveis nos arquivos .env do dotenv (já existe um arquivo
+  .env.test que além de servir para os testes automatizados, também serve como exemplo para o aquivo
+de .env.development ou .env para produção. Repare que as variáveis do .env.test podem precisar ser
+alteradas para as configurações da sua máquina).
+
+- Certifique-se de que o usuário definido na variável POSTGRES_USER tem permissões para criação e
+  leitura para o banco de dados POSTGRES_USER. Isso será necessário.
+
+- Uma vez configurado o banco e as variáveis de ambiente, execute na linha de comando o seguinte comando para criar a estrutura do banco de dados corretamente.
+
+$ ruby -r "./db_manager.rb" -e "DbManager.setup_db"
+
+- Para testar automatizadamente a aplicação, execute:
+
+$ ruby -r "./upload_app_spec.rb"
+
+- para aplica o linter no código, execute:
+
+$ rubocop -a
+
+- Para habilitar o servidor da aplicação, execute:
+
+$ ruby -r "./upload_app.rb"
