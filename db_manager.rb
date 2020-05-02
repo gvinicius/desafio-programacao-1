@@ -1,10 +1,13 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #
 # db_manager.rb
 # Copyright (C) 2020 vinicius <vinicius@debian>
 #
 # Distributed under terms of the MIT license.
 #
+require 'pg'
 
 class DbManager
   def self.connection
@@ -15,30 +18,37 @@ class DbManager
     }
 
     @@connection ||= PG::Connection.new(db_params)
-    return @@connection
+    @@connection
   end
 
   def self.check_if_exists
-    self.connection.exec_params("SELECT 1 FROM pg_database WHERE datname = '#{ENV['POSTGRES_DATABASE']}'").first&.values&.to_a&.any? || false
+    connection.exec_params("SELECT 1 FROM pg_database WHERE datname = '#{ENV['POSTGRES_DATABASE']}'").first&.values&.to_a&.any? || false
   end
 
   def self.create
-    self.connection.exec_params("CREATE DATABASE #{ENV['POSTGRES_DATABASE']};")
+    connection.exec_params("CREATE DATABASE #{ENV['POSTGRES_DATABASE']};")
   end
 
   def self.migrate
-    self.connection.exec_params("CREATE TABLE uploads (id bigserial primary key, filename varchar(20) NOT NULL);")
+    connection.exec_params('CREATE TABLE uploads (id bigserial primary key, filename varchar(20) NOT NULL);')
   end
 
   def self.drop
-    self.connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};")
+    connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};")
   end
 
   def self.setup
-    if self.check_if_exists
-      self.drop
-      self.create
-      self.migrate
+    unless check_if_exists
+      create
+      migrate
     end
+  end
+
+  def self.insert(table, columns, values)
+    connection.exec_params("INSERT INTO #{table} (#{columns.join(',')}) values (#{values.map { |value| "'#{value}'" }.join(',')});")
+  end
+
+  def self.list(table)
+    connection.exec_params("SELECT * FROM #{table};")
   end
 end

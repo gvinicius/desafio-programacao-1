@@ -1,2 +1,6 @@
 .byebug_history
-
+uploads_development/
+uploads_production/
+uploads_test/
+.env.development
+.env.production

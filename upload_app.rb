@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #
 # uploader.rb
 # Copyright (C) 2020 vinicius <vinicius@debian>
@@ -10,7 +12,7 @@ require 'dotenv'
 require './db_manager.rb'
 require 'sinatra'
 require 'pg'
-Dotenv.load(".env.#{ENV['APP_ENV']}") # Remember to set your app environment
+Dotenv.load(".env.#{ENV['APP_ENV']}")
 
 set :bind, '0.0.0.0'
 
@@ -19,8 +21,12 @@ get '/' do
 end
 
 post '/upload' do
-  FileUtils.mkdir_p 'uploads'
-  FileUtils.copy(params[:file][:tempfile].path, "./uploads/#{params[:file][:filename]}")
+  base_path = 'uploads_' + ENV['APP_ENV']
+  FileUtils.mkdir_p(base_path)
+  FileUtils.copy(params[:file][:tempfile].path, "#{base_path}/#{params[:file][:filename]}")
+  puts ENV['APP_ENV']
+  puts ENV['POSTGRES_DATABASE']
 
-  items = DbManager.connection.exec_params('SELECT * FROM items;')
+  DbManager.insert('uploads', ['filename'], [params[:file][:filename]])
+  redirect('/')
 end
