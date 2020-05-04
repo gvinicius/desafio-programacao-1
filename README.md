@@ -86,3 +86,6 @@ $ rubocop -a
 - Para habilitar o servidor local da aplicação, execute:
 
 $ ruby upload_app.rb
+
+Obs.: A gem simplecov está apresentando um problema que só marca os cabeçalhos dos métodos como
+executados nessa aplicação Sinatra.

@@ -28,6 +28,10 @@ class UploadAppTest < Minitest::Test
     DbManager.setup
   end
 
+  def after
+    system('rm -Rf uploads_test/*')
+  end
+
   def test_index
     get '/'
 
@@ -46,8 +50,6 @@ class UploadAppTest < Minitest::Test
     post '/upload', file: Rack::Test::UploadedFile.new(filename, 'text/plain')
 
     assert_equal('João Silva', DbManager.list('sales').first['purchaser_name'])
-
-    system('rm -Rf uploads_test/*')
   end
 
   def test_revenues

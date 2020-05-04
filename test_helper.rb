@@ -10,7 +10,5 @@ ENV['APP_ENV'] = 'test'
 require 'minitest/autorun'
 require 'rack/test'
 require 'simplecov'
-SimpleCov.start 'rails' do
-  add_filter %r{^/test|db_manager/}
-  add_group "Files", "./**.rb"
-end
+SimpleCov.coverage_dir('./')
+SimpleCov.start
