@@ -77,7 +77,7 @@ $ ruby -r "./db_manager.rb" -e "DbManager.drop"
 
 - Para testar automatizadamente a aplicação, execute:
 
-$ ruby upload_app_spec.rb
+$ ruby upload_app_test.rb
 
 - Para aplicar o linter no código, execute:
 

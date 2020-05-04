@@ -8,37 +8,37 @@
 # Distributed under terms of the MIT license.
 #
 
-ENV['APP_ENV'] = 'test'
-
+require './test_helper.rb'
 require './sales_parser.rb'
-require './upload_app.rb'
 require './db_manager.rb'
 require 'minitest/autorun'
 require 'rack/test'
-require 'byebug'
+require './upload_app.rb'
 
-class UploaderTest < Minitest::Test
+class UploadAppTest < Minitest::Test
   include Rack::Test::Methods
 
   def app
+    Sinatra::Application
+  end
+
+  def setup
     # Erase database everytime in order to prevent undesirable data
     DbManager.drop if DbManager.check_if_exists
     DbManager.setup
-    Sinatra::Application
   end
 
   def test_index
     get '/'
 
+    assert last_response.ok?
     assert_match(/Upload/, last_response.body)
-    # The database is not erased because there is no database manipulation there
   end
 
   def test_sales_parser
     sales = SalesParser.new('example_input.tab', File.new('example_input.tab'))
 
     assert_equal('purchaser_name', sales.header.first)
-    # The database is not erased because there is no database manipulation there
   end
 
   def test_upload
@@ -48,7 +48,6 @@ class UploaderTest < Minitest::Test
     assert_equal('João Silva', DbManager.list('sales').first['purchaser_name'])
 
     system('rm -Rf uploads_test/*')
-    DbManager.drop
   end
 
   def test_revenues
@@ -58,7 +57,5 @@ class UploaderTest < Minitest::Test
 
     assert_equal(DbManager.aggregate.to_f, 95.0)
     assert_match(DbManager.aggregate, last_response.body)
-
-    DbManager.drop
   end
 end

@@ -4,3 +4,4 @@ uploads_production/
 uploads_test/
 .env.development
 .env.production
+coverage
