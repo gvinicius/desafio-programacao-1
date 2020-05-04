@@ -31,6 +31,7 @@ class UploaderTest < Minitest::Test
     get '/'
 
     assert_match /Upload/, last_response.body
+    # Here the database is not erased because there is no database manipulation there
   end
 
   def test_upload

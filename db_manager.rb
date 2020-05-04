@@ -13,16 +13,25 @@ require 'dotenv'
 Dotenv.load(".env.#{ENV['APP_ENV']}")
 
 class DbManager
+  @@connection = nil
+
   def self.connection(dbname={})
+    unless @@connection == nil
+      @@connection.close
+      @@connection = nil
+    end
     db_params = {
       host: ENV['POSTGRES_HOST'],
       user: ENV['POSTGRES_USER'],
       password: ENV['POSTGRES_PASSWORD']
     }
 
-    @@connection ||= PG::Connection.new(db_params)
-    @@connection = PG::Connection.new(db_params.merge(dbname)) if dbname != {}
-    @@connection
+    if dbname != {}
+      @@connection = PG::Connection.new(db_params.merge(dbname))
+    else
+      @@connection ||= PG::Connection.new(db_params)
+    end
+      @@connection
   end
 
   def self.check_if_exists
@@ -31,21 +40,19 @@ class DbManager
 
   def self.create
     connection.exec_params("CREATE DATABASE #{ENV['POSTGRES_DATABASE']};")
-    @@connection.close
-    @@connection = nil
     connection({dbname: ENV['POSTGRES_DATABASE']})
   end
 
   def self.migrate
-    connection.exec_params('CREATE TABLE sales (id bigserial primary key, purchaser_name varchar(60), item_description varchar(60), item_price decimal(10,2), purchase_count integer, merchant_address varchar(60), merchant_name varchar(60), file_name varchar(60));')
+    connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params('CREATE TABLE sales (id bigserial primary key, purchaser_name varchar(60), item_description varchar(60), item_price decimal(10,2), purchase_count integer, merchant_address varchar(60), merchant_name varchar(60), file_name varchar(60));')
   end
 
   def self.drop
-    connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};") if check_if_exists && (connection.close rescue true)
+    connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};") if check_if_exists
   end
 
   def self.insert(table, columns, values)
-    connection.exec_params("INSERT INTO #{table} (#{columns.join(',')}) values " + values + ';')
+    connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params("INSERT INTO #{table} (#{columns.join(',')}) values " + values + ';')
   end
 
   def self.setup
@@ -55,6 +62,6 @@ class DbManager
   end
 
   def self.list(table)
-    connection.exec_params("SELECT * FROM #{table};")
+    connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params("SELECT * FROM #{table};")
   end
 end

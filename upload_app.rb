@@ -29,8 +29,6 @@ post '/upload' do
   FileUtils.copy(params[:file][:tempfile].path, uploaded_path)
   parsed_file = CSV.read(uploaded_path, { col_sep: "\t" })
   sales = parsed_file[1, parsed_file.length].to_s[1...-1].gsub('[', '(').gsub(']', ')').gsub('\'', "''").gsub('"', '\'')
-  # byebug
-  # puts sales
 
   DbManager.insert('sales', parsed_file[0].map { |column| column.gsub(' ', '_') }, sales)
   redirect('/')
