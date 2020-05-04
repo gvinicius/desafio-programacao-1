@@ -10,6 +10,7 @@
 
 ENV['APP_ENV'] = 'test'
 
+#require 'byebug'
 require './upload_app.rb'
 require './db_manager.rb'
 require 'minitest/autorun'
@@ -20,6 +21,7 @@ class UploaderTest < Minitest::Test
   include Rack::Test::Methods
 
   def app
+    # Erase database everytime in order to prevent undesirable data
     if DbManager.check_if_exists
       DbManager.drop
     end
@@ -41,6 +43,17 @@ class UploaderTest < Minitest::Test
     assert_equal 'João Silva', DbManager.list('sales').first["purchaser_name"]
 
     system('rm -Rf uploads_test/*')
+    DbManager.drop
+  end
+
+  def test_revenues
+    filename = 'example_input.tab'
+    post '/upload', file: Rack::Test::UploadedFile.new(filename, 'text/plain')
+    get '/revenues'
+
+    assert_equal DbManager.aggregate.to_f, 95.0
+    assert_match DbManager.aggregate, last_response.body
+
     DbManager.drop
   end
 end

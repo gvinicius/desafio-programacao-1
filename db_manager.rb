@@ -64,4 +64,10 @@ class DbManager
   def self.list(table)
     connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params("SELECT * FROM #{table};")
   end
+
+  def self.aggregate
+    result = connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params("SELECT SUM(item_price * purchase_count) FROM sales;")&.first
+
+    result.class != Hash || result['sum'].nil? ? 0 : result['sum']
+  end
 end

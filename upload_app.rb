@@ -31,5 +31,12 @@ post '/upload' do
   sales = parsed_file[1, parsed_file.length].to_s[1...-1].gsub('[', '(').gsub(']', ')').gsub('\'', "''").gsub('"', '\'')
 
   DbManager.insert('sales', parsed_file[0].map { |column| column.gsub(' ', '_') }, sales)
-  redirect('/')
+  redirect('/revenues')
+end
+
+get '/revenues' do
+  #byebug
+  @revenues = DbManager.aggregate
+
+  erb :revenues
 end
