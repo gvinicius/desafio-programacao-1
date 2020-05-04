@@ -46,7 +46,7 @@ Adicionalmente, tentaremos verificar a sua familiarização com as bibliotecas p
 
 Este desafio foi baseado neste outro desafio: https://github.com/lschallenges/data-engineering
 
-* Minha implementação
+### Notas sobre a minha implementação (como configurá-la, testá-la e usá-la)
 
 - Instale e configure o ruby 2.6.5.
 
@@ -71,14 +71,18 @@ alteradas para as configurações da sua máquina).
 
 $ ruby -r "./db_manager.rb" -e "DbManager.setup"
 
+- É possível ainda utilizar um método para remover o banco de dados.
+
+$ ruby -r "./db_manager.rb" -e "DbManager.drop"
+
 - Para testar automatizadamente a aplicação, execute:
 
-$ ruby -r "./upload_app_spec.rb"
+$ ruby upload_app_spec.rb
 
 - Para aplicar o linter no código, execute:
 
 $ rubocop -a
 
-- Para habilitar o servidor da aplicação, execute:
+- Para habilitar o servidor local da aplicação, execute:
 
-$ ruby -r "./upload_app.rb"
+$ ruby upload_app.rb

@@ -10,6 +10,7 @@
 
 require 'dotenv'
 require './db_manager.rb'
+require './sales_parser.rb'
 require 'sinatra'
 require 'pg'
 require 'csv'
@@ -23,19 +24,13 @@ get '/' do
 end
 
 post '/upload' do
-  base_path = 'uploads_' + ENV['APP_ENV']
-  uploaded_path = "#{base_path}/#{params[:file][:filename]}"
-  FileUtils.mkdir_p(base_path)
-  FileUtils.copy(params[:file][:tempfile].path, uploaded_path)
-  parsed_file = CSV.read(uploaded_path, { col_sep: "\t" })
-  sales = parsed_file[1, parsed_file.length].to_s[1...-1].gsub('[', '(').gsub(']', ')').gsub('\'', "''").gsub('"', '\'')
+  sales = SalesParser.new(params[:file][:filename], params[:file][:tempfile])
 
-  DbManager.insert('sales', parsed_file[0].map { |column| column.gsub(' ', '_') }, sales)
+  DbManager.insert('sales', sales.header, sales.content)
   redirect('/revenues')
 end
 
 get '/revenues' do
-  #byebug
   @revenues = DbManager.aggregate
 
   erb :revenues

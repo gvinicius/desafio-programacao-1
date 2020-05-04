@@ -15,8 +15,8 @@ Dotenv.load(".env.#{ENV['APP_ENV']}")
 class DbManager
   @@connection = nil
 
-  def self.connection(dbname={})
-    unless @@connection == nil
+  def self.connection(dbname = {})
+    unless @@connection.nil?
       @@connection.close
       @@connection = nil
     end
@@ -31,7 +31,7 @@ class DbManager
     else
       @@connection ||= PG::Connection.new(db_params)
     end
-      @@connection
+    @@connection
   end
 
   def self.check_if_exists
@@ -40,19 +40,21 @@ class DbManager
 
   def self.create
     connection.exec_params("CREATE DATABASE #{ENV['POSTGRES_DATABASE']};")
-    connection({dbname: ENV['POSTGRES_DATABASE']})
+    connection({ dbname: ENV['POSTGRES_DATABASE'] })
   end
 
   def self.migrate
-    connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params('CREATE TABLE sales (id bigserial primary key, purchaser_name varchar(60), item_description varchar(60), item_price decimal(10,2), purchase_count integer, merchant_address varchar(60), merchant_name varchar(60), file_name varchar(60));')
+    connection({ dbname: ENV['POSTGRES_DATABASE'] }).exec_params('CREATE TABLE sales (id bigserial primary key, purchaser_name varchar(60), item_description varchar(60), item_price decimal(10,2), purchase_count integer, merchant_address varchar(60), merchant_name varchar(60), file_name varchar(60));')
   end
 
   def self.drop
-    connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};") if check_if_exists
+    if check_if_exists
+      connection.exec_params("DROP DATABASE #{ENV['POSTGRES_DATABASE']};")
+    end
   end
 
   def self.insert(table, columns, values)
-    connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params("INSERT INTO #{table} (#{columns.join(',')}) values " + values + ';')
+    connection({ dbname: ENV['POSTGRES_DATABASE'] }).exec_params("INSERT INTO #{table} (#{columns.join(',')}) values " + values + ';')
   end
 
   def self.setup
@@ -62,11 +64,11 @@ class DbManager
   end
 
   def self.list(table)
-    connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params("SELECT * FROM #{table};")
+    connection({ dbname: ENV['POSTGRES_DATABASE'] }).exec_params("SELECT * FROM #{table};")
   end
 
   def self.aggregate
-    result = connection({dbname: ENV['POSTGRES_DATABASE']}).exec_params("SELECT SUM(item_price * purchase_count) FROM sales;")&.first
+    result = connection({ dbname: ENV['POSTGRES_DATABASE'] }).exec_params('SELECT SUM(item_price * purchase_count) FROM sales;')&.first
 
     result.class != Hash || result['sum'].nil? ? 0 : result['sum']
   end

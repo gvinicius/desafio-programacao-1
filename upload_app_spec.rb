@@ -10,7 +10,7 @@
 
 ENV['APP_ENV'] = 'test'
 
-#require 'byebug'
+require './sales_parser.rb'
 require './upload_app.rb'
 require './db_manager.rb'
 require 'minitest/autorun'
@@ -22,9 +22,7 @@ class UploaderTest < Minitest::Test
 
   def app
     # Erase database everytime in order to prevent undesirable data
-    if DbManager.check_if_exists
-      DbManager.drop
-    end
+    DbManager.drop if DbManager.check_if_exists
     DbManager.setup
     Sinatra::Application
   end
@@ -32,15 +30,22 @@ class UploaderTest < Minitest::Test
   def test_index
     get '/'
 
-    assert_match /Upload/, last_response.body
-    # Here the database is not erased because there is no database manipulation there
+    assert_match(/Upload/, last_response.body)
+    # The database is not erased because there is no database manipulation there
+  end
+
+  def test_sales_parser
+    sales = SalesParser.new('example_input.tab', File.new('example_input.tab'))
+
+    assert_equal('purchaser_name', sales.header.first)
+    # The database is not erased because there is no database manipulation there
   end
 
   def test_upload
     filename = 'example_input.tab'
     post '/upload', file: Rack::Test::UploadedFile.new(filename, 'text/plain')
 
-    assert_equal 'João Silva', DbManager.list('sales').first["purchaser_name"]
+    assert_equal('João Silva', DbManager.list('sales').first['purchaser_name'])
 
     system('rm -Rf uploads_test/*')
     DbManager.drop
@@ -51,8 +56,8 @@ class UploaderTest < Minitest::Test
     post '/upload', file: Rack::Test::UploadedFile.new(filename, 'text/plain')
     get '/revenues'
 
-    assert_equal DbManager.aggregate.to_f, 95.0
-    assert_match DbManager.aggregate, last_response.body
+    assert_equal(DbManager.aggregate.to_f, 95.0)
+    assert_match(DbManager.aggregate, last_response.body)
 
     DbManager.drop
   end
